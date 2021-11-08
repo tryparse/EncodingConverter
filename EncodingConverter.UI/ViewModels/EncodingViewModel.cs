@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Caliburn.Micro;
 using EncodingConverter.UI.Models;
@@ -119,18 +120,20 @@ namespace EncodingConverter.UI.ViewModels
                 && SelectedSourceEncoding != SelectedDestinationEncoding
                 && !string.IsNullOrWhiteSpace(SourceFilePath);
 
-        public void Convert()
+        public async Task Convert()
         {
-            Task.Run(async () =>
+            await Task.Run(async () =>
             {
-                var data = File.ReadAllBytes(_path.FullName);
+                var data = await File.ReadAllBytesAsync(_path.FullName);
 
                 var source = Encoding.GetEncoding(SelectedSourceEncoding.CodePage);
                 var destination = Encoding.GetEncoding(SelectedDestinationEncoding.CodePage);
 
                 var outputData = new EncodingConverter.Core.Converter().Convert(source, destination, data);
 
-                File.WriteAllBytes(Path.Combine(_path.DirectoryName, $"{_path.Name}_{SelectedDestinationEncoding.DisplayName}_{Guid.NewGuid()}{_path.Extension}"), outputData);
+                await Task.Delay(1500);
+
+                await File.WriteAllBytesAsync(Path.Combine(_path.DirectoryName, $"{_path.Name}_{SelectedDestinationEncoding.DisplayName}_{Guid.NewGuid()}{_path.Extension}"), outputData);
             }).ContinueWith((previousTask) =>
             {
                 OperationResult = "Complete";

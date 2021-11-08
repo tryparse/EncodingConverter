@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Windows;
+using System.Windows.Threading;
 using Caliburn.Micro;
 using EncodingConverter.UI.ViewModels;
 using EncodingConverter.UI.Views;
@@ -19,8 +20,7 @@ namespace EncodingConverter.UI
 
         protected override object GetInstance(Type serviceType, string key)
         {
-            var instance = _container.GetInstance(serviceType, key);
-            return instance;
+            return _container.GetInstance(serviceType, key);
         }
 
         protected override IEnumerable<object> GetAllInstances(Type serviceType)
@@ -63,6 +63,16 @@ namespace EncodingConverter.UI
             {
                 Debug.WriteLine(ex);
             }
+        }
+
+        protected override void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        {
+            base.OnUnhandledException(sender, e);
+        }
+
+        protected override void OnExit(object sender, EventArgs e)
+        {
+            base.OnExit(sender, e);
         }
 
         private void BuildConfiguration()
