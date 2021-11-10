@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using EncodingConverter.UI.WPF.Config;
 using EncodingConverter.UI.WPF.ViewModels;

@@ -1,6 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Threading.Tasks;
-using System.Windows.Input;
 using EncodingConverter.UI.WPF.Commands;
 using EncodingConverter.UI.WPF.Models;
 
