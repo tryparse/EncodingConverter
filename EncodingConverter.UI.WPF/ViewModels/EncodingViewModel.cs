@@ -6,8 +6,11 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using EncodingConverter.UI.WPF.Commands;
+using EncodingConverter.UI.WPF.Config;
 using EncodingConverter.UI.WPF.Models;
 using Microsoft.Win32;
 
@@ -19,7 +22,7 @@ namespace EncodingConverter.UI.WPF.ViewModels
         private readonly IEncodingConverterConfig _config;
 
         public ObservableCollection<EncodingModel> SourceEncodings { get; set; }
-        public ObservableCollection<EncodingModel> TargetEncodings { get; set; }
+        public ObservableCollection<EncodingModel> DestinationEncodings { get; set; }
 
         private EncodingModel _selectedSourceEncoding;
 
@@ -72,7 +75,7 @@ namespace EncodingConverter.UI.WPF.ViewModels
             }
         }
 
-        public string _operationResult;
+        private string _operationResult;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -87,9 +90,24 @@ namespace EncodingConverter.UI.WPF.ViewModels
             set
             {
                 _operationResult = value;
-                OnPropertyChanged("OperationResult");
+                OnPropertyChanged(nameof(OperationResult));
             }
         }
+
+        private bool _operationInProgress;
+
+        public bool IsOperationInProgress
+        {
+            get => _operationInProgress;
+            set
+            {
+                _operationInProgress = value;
+                OnPropertyChanged(nameof(IsOperationInProgress));
+                OnPropertyChanged(nameof(OperationProgress));
+            }
+        }
+
+        public int OperationProgress => IsOperationInProgress ? 0 : 100;
 
         public EncodingViewModel(IEncodingConverterConfig config)
         {
@@ -103,12 +121,12 @@ namespace EncodingConverter.UI.WPF.ViewModels
                     .ToList();
 
             SourceEncodings = new ObservableCollection<EncodingModel>(_encodings);
-            TargetEncodings = new ObservableCollection<EncodingModel>(_encodings);
+            DestinationEncodings = new ObservableCollection<EncodingModel>(_encodings);
         }
 
-        private ICommand _selectSourceFile;
+        private RelayCommand _selectSourceFile;
 
-        public ICommand SelectSourceFile
+        public RelayCommand SelectSourceFile
         {
             get
             {
@@ -145,20 +163,40 @@ namespace EncodingConverter.UI.WPF.ViewModels
                 && SelectedSourceEncoding != SelectedDestinationEncoding
                 && !string.IsNullOrWhiteSpace(SourceFilePath);
 
-        private ICommand _convertCommand;
+        private RelayCommand _convertCommand;
 
-        public ICommand Convert => _convertCommand ?? new RelayCommand((obj) =>
+        public RelayCommand Convert
         {
-            var data = File.ReadAllBytes(_path.FullName);
+            get
+            {
+                if (_convertCommand != null)
+                {
+                    return _convertCommand;
+                }
 
-            var source = Encoding.GetEncoding(SelectedSourceEncoding.CodePage);
-            var destination = Encoding.GetEncoding(SelectedDestinationEncoding.CodePage);
+                _convertCommand = new RelayCommand((obj) =>
+                {
+                    IsOperationInProgress = true;
 
-            var outputData = new EncodingConverter.Core.Converter().Convert(source, destination, data);
+                    var data = File.ReadAllBytes(_path.FullName);
 
-            File.WriteAllBytes(Path.Combine(_path.DirectoryName, $"{_path.Name}_{SelectedDestinationEncoding.DisplayName}_{Guid.NewGuid()}{_path.Extension}"), outputData);
+                    var source = Encoding.GetEncoding(SelectedSourceEncoding.CodePage);
+                    var destination = Encoding.GetEncoding(SelectedDestinationEncoding.CodePage);
 
-            OperationResult = "Complete";
-        });
+                    var outputData = new Core.Converter().Convert(source, destination, data);
+
+                    var fileName = $"{_path.Name}_{SelectedDestinationEncoding.DisplayName}_{Guid.NewGuid()}{_path.Extension}";
+                    var filePath = Path.Combine(_path.DirectoryName, fileName);
+
+                    File.WriteAllBytes(filePath, outputData);
+
+                    OperationResult = $"Complete: {fileName}";
+
+                    IsOperationInProgress = false;
+                });
+
+                return _convertCommand;
+            }
+        }
     }
 }

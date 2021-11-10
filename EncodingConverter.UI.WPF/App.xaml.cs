@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using EncodingConverter.UI.WPF.Config;
 using EncodingConverter.UI.WPF.ViewModels;
 using EncodingConverter.UI.WPF.Views;
 using Microsoft.Extensions.Configuration;

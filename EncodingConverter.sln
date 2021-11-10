@@ -3,11 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31702.278
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EncodingConverter.UI", "EncodingConverter.UI\EncodingConverter.UI.csproj", "{51546195-83E4-49AE-A5D4-C4403E975194}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EncodingConverter", "EncodingConverter\EncodingConverter.csproj", "{5A0C8D75-02A5-4C5C-B77D-6EEB783D5233}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EncodingConverter", "EncodingConverter\EncodingConverter.csproj", "{5A0C8D75-02A5-4C5C-B77D-6EEB783D5233}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EncodingConverter.UI.WPF", "EncodingConverter.UI.WPF\EncodingConverter.UI.WPF.csproj", "{4FB6F865-B1F4-4B6A-AC5E-54B85A6E4AF2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EncodingConverter.UI.WPF", "EncodingConverter.UI.WPF\EncodingConverter.UI.WPF.csproj", "{4FB6F865-B1F4-4B6A-AC5E-54B85A6E4AF2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,10 +13,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{51546195-83E4-49AE-A5D4-C4403E975194}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{51546195-83E4-49AE-A5D4-C4403E975194}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{51546195-83E4-49AE-A5D4-C4403E975194}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{51546195-83E4-49AE-A5D4-C4403E975194}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5A0C8D75-02A5-4C5C-B77D-6EEB783D5233}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5A0C8D75-02A5-4C5C-B77D-6EEB783D5233}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5A0C8D75-02A5-4C5C-B77D-6EEB783D5233}.Release|Any CPU.ActiveCfg = Release|Any CPU

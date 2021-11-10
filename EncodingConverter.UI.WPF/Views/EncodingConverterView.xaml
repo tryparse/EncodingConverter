@@ -30,7 +30,7 @@
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
-                    <Button Click="{Binding Path=SelectSourceFile}" Grid.Column="1" Margin="1">File...</Button>
+                    <Button Command="{Binding Path=SelectSourceFile}" Grid.Column="1" Margin="1">File...</Button>
                     <TextBlock Text="{Binding Path=SourceFilePath}" Grid.Column="2" TextAlignment="Justify" VerticalAlignment="Center"></TextBlock>
                 </Grid>
             </GroupBox>
@@ -41,7 +41,7 @@
                         <ColumnDefinition Width=".2*"/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-                    <ComboBox x:Name="TargetEncodings" SelectedItem="{Binding Path=SelectedDestinationEncoding, Mode=OneWayToSource}" Grid.Column="0">
+                    <ComboBox ItemsSource="{Binding Path=DestinationEncodings}" SelectedItem="{Binding Path=SelectedDestinationEncoding, Mode=OneWayToSource}" Grid.Column="0">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
@@ -52,14 +52,17 @@
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
-                    <Button Grid.Column="1" Grid.ColumnSpan="2" MaxWidth="100" Height="25">Convert</Button>
+                    <Button Grid.Column="1" Grid.ColumnSpan="2" MaxWidth="100" Height="25"
+                            IsEnabled="{Binding CanConvert}" Command="{Binding Convert}">Convert</Button>
                 </Grid>
             </GroupBox>
-
         </StackPanel>
         <StatusBar MaxHeight="25" Height="25" Grid.Row="1" DockPanel.Dock="Bottom">
             <StatusBarItem>
-                <TextBlock x:Name="OperationResult"></TextBlock>
+                <ProgressBar IsIndeterminate="{Binding IsOperationInProgress}" Value="{Binding OperationProgress, Mode=OneWay}" Width="100"></ProgressBar>
+            </StatusBarItem>
+            <StatusBarItem>
+                <TextBlock Text="{Binding OperationResult}"></TextBlock>
             </StatusBarItem>
         </StatusBar>
     </Grid>

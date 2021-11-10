@@ -1,4 +1,4 @@
-﻿namespace EncodingConverter.UI.WPF
+﻿namespace EncodingConverter.UI.WPF.Config
 {
     public interface IEncodingConverterConfig
     {
