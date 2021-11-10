@@ -24,8 +24,24 @@ namespace EncodingConverter.UI.WPF.ViewModels
         public ObservableCollection<EncodingModel> SourceEncodings { get; set; }
         public ObservableCollection<EncodingModel> DestinationEncodings { get; set; }
 
-        private EncodingModel _selectedSourceEncoding;
+        public EncodingViewModel(IEncodingConverterConfig config)
+        {
+            _config = config ?? throw new ArgumentNullException(nameof(config));
 
+            _encodings = Encoding.GetEncodings()
+
+                    .Select(x => new EncodingModel { CodePage = x.CodePage, DisplayName = x.DisplayName, Priority = _config.PriorityEncodings.Contains(x.CodePage) })
+                    .OrderByDescending(x => x.Priority)
+                    .ThenBy(x => x.DisplayName)
+                    .ToList();
+
+            SourceEncodings = new ObservableCollection<EncodingModel>(_encodings);
+            DestinationEncodings = new ObservableCollection<EncodingModel>(_encodings);
+        }
+
+        #region UI bindable properties
+
+        private EncodingModel _selectedSourceEncoding;
         public EncodingModel SelectedSourceEncoding
         {
             get => _selectedSourceEncoding;
@@ -50,7 +66,6 @@ namespace EncodingConverter.UI.WPF.ViewModels
         }
 
         private FileInfo _path;
-
         private string _sourceFilePath;
         public string SourceFilePath
         {
@@ -76,14 +91,6 @@ namespace EncodingConverter.UI.WPF.ViewModels
         }
 
         private string _operationResult;
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public void OnPropertyChanged([CallerMemberName] string prop = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
-        }
-
         public string OperationResult
         {
             get => _operationResult;
@@ -95,7 +102,6 @@ namespace EncodingConverter.UI.WPF.ViewModels
         }
 
         private bool _operationInProgress;
-
         public bool IsOperationInProgress
         {
             get => _operationInProgress;
@@ -109,20 +115,14 @@ namespace EncodingConverter.UI.WPF.ViewModels
 
         public int OperationProgress => IsOperationInProgress ? 0 : 100;
 
-        public EncodingViewModel(IEncodingConverterConfig config)
-        {
-            _config = config ?? throw new ArgumentNullException(nameof(config));
+        public bool CanConvert => SelectedSourceEncoding != null
+                && SelectedDestinationEncoding != null
+                && SelectedSourceEncoding != SelectedDestinationEncoding
+                && !string.IsNullOrWhiteSpace(SourceFilePath);
 
-            _encodings = Encoding.GetEncodings()
+        #endregion UI bindable properties
 
-                    .Select(x => new EncodingModel { CodePage = x.CodePage, DisplayName = x.DisplayName, Priority = _config.PriorityEncodings.Contains(x.CodePage) })
-                    .OrderByDescending(x => x.Priority)
-                    .ThenBy(x => x.DisplayName)
-                    .ToList();
-
-            SourceEncodings = new ObservableCollection<EncodingModel>(_encodings);
-            DestinationEncodings = new ObservableCollection<EncodingModel>(_encodings);
-        }
+        #region Commands
 
         private RelayCommand _selectSourceFile;
 
@@ -135,7 +135,7 @@ namespace EncodingConverter.UI.WPF.ViewModels
                     return _selectSourceFile;
                 }
                 else
-                { 
+                {
                     _selectSourceFile = new RelayCommand((obj) =>
                     {
                         var dialog = new OpenFileDialog
@@ -157,11 +157,6 @@ namespace EncodingConverter.UI.WPF.ViewModels
                 return _selectSourceFile;
             }
         }
-
-        public bool CanConvert => SelectedSourceEncoding != null
-                && SelectedDestinationEncoding != null
-                && SelectedSourceEncoding != SelectedDestinationEncoding
-                && !string.IsNullOrWhiteSpace(SourceFilePath);
 
         private RelayCommand _convertCommand;
 
@@ -198,5 +193,18 @@ namespace EncodingConverter.UI.WPF.ViewModels
                 return _convertCommand;
             }
         }
+
+        #endregion Commands
+
+        #region INotifyPropertyChanged
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public void OnPropertyChanged([CallerMemberName] string prop = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
+        }
+
+        #endregion INotifyPropertyChanged
     }
 }
