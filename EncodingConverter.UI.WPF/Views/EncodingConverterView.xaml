@@ -30,8 +30,8 @@
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
-                    <Button Command="{Binding Path=SelectSourceFile}" Grid.Column="1" Margin="1">File...</Button>
-                    <TextBlock Text="{Binding Path=SourceFilePath}" Grid.Column="2" TextAlignment="Justify" VerticalAlignment="Center"></TextBlock>
+                    <Button Command="{Binding Path=SelectSourceFile}" Grid.Column="1" Margin="1,0,0,0">File...</Button>
+                    <TextBlock Text="{Binding Path=SourceFilePath}" Grid.Column="2" TextAlignment="Justify" VerticalAlignment="Center" Margin="5,0,0,0"></TextBlock>
                 </Grid>
             </GroupBox>
             <GroupBox Header="To">
@@ -59,10 +59,14 @@
         </StackPanel>
         <StatusBar MaxHeight="25" Height="25" Grid.Row="1" DockPanel.Dock="Bottom">
             <StatusBarItem>
-                <ProgressBar IsIndeterminate="{Binding IsOperationInProgress}" Value="{Binding OperationProgress, Mode=OneWay}" Width="100"></ProgressBar>
+                <TextBlock Text="{Binding OperationError}"/>
             </StatusBarItem>
             <StatusBarItem>
-                <TextBlock Text="{Binding OperationResult}"></TextBlock>
+                <TextBlock>
+                    <Hyperlink NavigateUri="{Binding ResultFilePath}" Command="{Binding OpenNewFile}">
+                        <TextBlock Text="{Binding OperationResult}"/>
+                    </Hyperlink>
+                </TextBlock>
             </StatusBarItem>
         </StatusBar>
     </Grid>

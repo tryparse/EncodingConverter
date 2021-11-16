@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -29,7 +30,7 @@ namespace EncodingConverter.UI.WPF.ViewModels
 
                     .Select(x => new EncodingModel { CodePage = x.CodePage, DisplayName = x.DisplayName, Priority = _config.PriorityEncodings.Contains(x.CodePage) })
                     .OrderByDescending(x => x.Priority)
-                    .ThenBy(x => x.DisplayName)
+                    .ThenBy(x => x.CodePage)
                     .ToList();
 
             SourceEncodings = new ObservableCollection<EncodingModel>(_encodings);
@@ -87,7 +88,7 @@ namespace EncodingConverter.UI.WPF.ViewModels
             }
         }
 
-        private string _operationResult;
+        private string _operationResult = string.Empty;
         public string OperationResult
         {
             get => _operationResult;
@@ -98,19 +99,28 @@ namespace EncodingConverter.UI.WPF.ViewModels
             }
         }
 
-        private bool _operationInProgress;
-        public bool IsOperationInProgress
+
+        private string _resultPath = string.Empty;
+        public string ResultFilePath
         {
-            get => _operationInProgress;
+            get => _resultPath;
             set
             {
-                _operationInProgress = value;
-                OnPropertyChanged(nameof(IsOperationInProgress));
-                OnPropertyChanged(nameof(OperationProgress));
+                _resultPath = value;
+                OnPropertyChanged(nameof(ResultFilePath));
             }
         }
 
-        public int OperationProgress => IsOperationInProgress ? 0 : 100;
+        private string _operationError;
+        public string OperationError
+        {
+            get => _operationError;
+            set
+            {
+                _operationError = value;
+                OnPropertyChanged(nameof(OperationError));
+            }
+        }
 
         public bool CanConvert => SelectedSourceEncoding != null
                 && SelectedDestinationEncoding != null
@@ -168,26 +178,62 @@ namespace EncodingConverter.UI.WPF.ViewModels
 
                 _convertCommand = new RelayCommand((obj) =>
                 {
-                    IsOperationInProgress = true;
+                    try
+                    {
+                        var data = File.ReadAllBytes(_path.FullName);
 
-                    var data = File.ReadAllBytes(_path.FullName);
+                        var source = Encoding.GetEncoding(SelectedSourceEncoding.CodePage);
+                        var destination = Encoding.GetEncoding(SelectedDestinationEncoding.CodePage);
 
-                    var source = Encoding.GetEncoding(SelectedSourceEncoding.CodePage);
-                    var destination = Encoding.GetEncoding(SelectedDestinationEncoding.CodePage);
+                        var outputData = new Core.Converter().Convert(source, destination, data);
 
-                    var outputData = new Core.Converter().Convert(source, destination, data);
+                        var fileName = $"{_path.Name}_{SelectedDestinationEncoding.DisplayName}_{Guid.NewGuid()}{_path.Extension}";
+                        var filePath = Path.Combine(_path.DirectoryName, fileName);
 
-                    var fileName = $"{_path.Name}_{SelectedDestinationEncoding.DisplayName}_{Guid.NewGuid()}{_path.Extension}";
-                    var filePath = Path.Combine(_path.DirectoryName, fileName);
+                        File.WriteAllBytes(filePath, outputData);
 
-                    File.WriteAllBytes(filePath, outputData);
-
-                    OperationResult = $"Complete: {fileName}";
-
-                    IsOperationInProgress = false;
+                        OperationResult = fileName;
+                        ResultFilePath = filePath;
+                    }
+                    catch (Exception ex)
+                    {
+                        OperationError = ex.Message;
+                    }
                 });
 
                 return _convertCommand;
+            }
+        }
+
+        private RelayCommand _openNewFile;
+
+        public RelayCommand OpenNewFile
+        {
+            get
+            {
+                if (_openNewFile != null)
+                {
+                    return _openNewFile;
+                }
+
+                _openNewFile = new RelayCommand((obj) =>
+                {
+                    if (!string.IsNullOrWhiteSpace(ResultFilePath)
+                        && File.Exists(ResultFilePath))
+                    {
+                        using var p = new Process();
+
+                        p.StartInfo = new ProcessStartInfo(ResultFilePath)
+                        {
+                            CreateNoWindow = false,
+                            UseShellExecute = true
+                        };
+
+                        p.Start();
+                    }
+                });
+
+                return _openNewFile;
             }
         }
 
